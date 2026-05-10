@@ -189,7 +189,7 @@ const QUESTIONS = {
     intro: "Pick the option that best matches your RQ verb. Examples in italics.",
     choices: [
       {label: "Comparing groups", desc: "Do groups differ on some outcome? <em>Do athletes report different stress scores than non-athletes?</em>", value: 1},
-      {label: "Looking for a relationship between two variables", desc: "<em>Is sleep duration associated with academic engagement?</em>", value: 2},
+      {label: "Looking for relationships between variables", desc: "Two or more variables — and you want to know if they hang together. <em>Is sleep duration associated with academic engagement? Are sleep, study hours, and screen time all related to grades?</em>", value: 2},
       {label: "Predicting one variable from one or more others", desc: "<em>Does GPA + sleep + study hours predict engagement?</em>", value: 3},
       {label: "Just describing a single variable", desc: "<em>How frequently do AP students report feeling overwhelmed?</em>", value: 4}
     ]
@@ -245,22 +245,23 @@ const QUESTIONS = {
     ]
   },
   q12: {
-    title: "How many levels does your categorical variable have?",
-    intro: "<strong>Binary</strong> = exactly 2 categories (yes/no, athlete/non-athlete, attended/didn't). <strong>3+ levels</strong> = more than two (freshman/sophomore/junior/senior, or multiple workshop conditions).",
+    title: "How many variables are you relating?",
+    intro: "Mixed types means you have a continuous variable + a categorical variable in your relationship. With more variables, the analysis changes.",
     choices: [
-      {label: "Binary (2 categories)", desc: "<em>Athlete vs. non-athlete · attended vs. didn't · pass vs. fail</em>", value: 1},
-      {label: "3 or more categories", desc: "<em>Grade level · multiple workshop conditions · 4 different teachers</em>", value: 2}
+      {label: "Just two variables — one continuous, one binary categorical", desc: "<em>e.g., athlete (yes/no) and stress score</em>. Routes to point-biserial correlation.", value: 1},
+      {label: "Just two variables — one continuous, one categorical with 3+ levels", desc: "<em>e.g., grade level (9/10/11/12) and engagement score</em>. This is really a group comparison.", value: 2},
+      {label: "Three or more variables of mixed types", desc: "<em>e.g., sleep + GPA + workshop-attended (yes/no) — or any combination of continuous and categorical, 3+ vars</em>. Routes to the predict path.", value: 3}
     ]
   },
   // Relationships branch
   q5: {
     title: "What kind of variables are you relating?",
-    intro: "Both variables in the relationship — what types are they?",
+    intro: "Look at the variable types you want to relate. With 3+ variables, the answer changes depending on whether they're <em>all the same type</em> or <em>mixed</em>.",
     choices: [
-      {label: "Both continuous, expecting a roughly linear relationship", desc: "<em>e.g., sleep hours and engagement scores</em>", value: 1},
-      {label: "Both continuous OR ordinal, but non-linear / ranked", desc: "<em>or one of them is a Likert ranking</em>", value: 2},
-      {label: "Both categorical", desc: "<em>e.g., grade level × workshop attendance</em>", value: 3},
-      {label: "One continuous and one categorical", desc: "<em>e.g., athlete status × stress score</em> — this is actually a group comparison; you'll be redirected.", value: 4}
+      {label: "All continuous, expecting linear relationships", desc: "<em>e.g., sleep hours, engagement scores, study hours — all numerical</em>", value: 1},
+      {label: "All continuous OR ordinal, non-linear / ranked", desc: "<em>or some of them are Likert rankings · some pairs may be non-linear</em>", value: 2},
+      {label: "All categorical", desc: "<em>e.g., grade level × workshop attendance × pass-fail</em>", value: 3},
+      {label: "Mixed: continuous AND categorical variables together", desc: "<em>e.g., athlete status × stress score · or sleep + GPA + workshop-attended together</em>", value: 4}
     ]
   },
   // Predicting branch
@@ -521,9 +522,10 @@ function pickRecommendation(a) {
       return 'chisq_rel';
     }
     if (a.q5 === 4) {
-      // One continuous + one categorical
-      if (a.q12 === 1) return 'point_biserial';   // binary categorical → point-biserial r
-      if (a.q12 === 2) return 'redirect';         // 3+ categories → really an ANOVA, redirect
+      // Mixed types
+      if (a.q12 === 1) return 'point_biserial';      // 2 vars: 1 cont + 1 binary
+      if (a.q12 === 2) return 'redirect';            // 2 vars: 1 cont + 1 cat (3+ levels) → ANOVA
+      if (a.q12 === 3) return 'multi_var_redirect';  // 3+ mixed → predict path
     }
   }
   // Predicting branch
