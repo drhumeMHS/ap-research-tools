@@ -238,10 +238,18 @@ const QUESTIONS = {
   },
   q9: {
     title: "How many variables are in your relationship?",
-    intro: "A standard correlation looks at two variables. If you're examining whether <em>three or more variables hang together</em>, that's a different analysis.",
+    intro: "A standard correlation looks at two variables at a time. With <em>three or more</em>, the analysis changes.",
     choices: [
-      {label: "Just two variables", desc: "<em>Sleep × engagement</em> — single correlation.", value: 1},
-      {label: "Three or more variables", desc: "<em>Sleep + study hours + caffeine — and engagement</em>. You're not really 'looking for a relationship' anymore — you're predicting one variable from several. Use the predict path.", value: 2}
+      {label: "Just two variables", desc: "<em>Sleep × engagement</em> — a single correlation.", value: 1},
+      {label: "Three or more variables", desc: "<em>Sleep + study hours + caffeine + engagement</em> — multiple variables you want to relate. The analysis changes depending on the variable types you picked above.", value: 2}
+    ]
+  },
+  q12: {
+    title: "How many levels does your categorical variable have?",
+    intro: "<strong>Binary</strong> = exactly 2 categories (yes/no, athlete/non-athlete, attended/didn't). <strong>3+ levels</strong> = more than two (freshman/sophomore/junior/senior, or multiple workshop conditions).",
+    choices: [
+      {label: "Binary (2 categories)", desc: "<em>Athlete vs. non-athlete · attended vs. didn't · pass vs. fail</em>", value: 1},
+      {label: "3 or more categories", desc: "<em>Grade level · multiple workshop conditions · 4 different teachers</em>", value: 2}
     ]
   },
   // Relationships branch
@@ -342,11 +350,11 @@ const RECOMMENDATIONS = {
            <p><strong>How to report:</strong> "Grade level was significantly associated with workshop attendance, χ²(3) = 14.2, p &lt; 0.01."</p>`
   },
   redirect: {
-    test: "↺ This is actually a group comparison",
+    test: "↺ This is really a group comparison (ANOVA)",
     cls: "redirect",
-    body: `<p>One continuous + one categorical variable is what we call a <em>group comparison</em>: the categorical variable defines the groups, the continuous variable is the outcome.</p>
-           <p><strong>What to do:</strong> restart this tool. On Q1, pick "<em>Comparing groups</em>" instead of "<em>Looking for a relationship</em>." Then answer the follow-ups about the groups and outcome — you'll likely land on a t-test or ANOVA.</p>
-           <p><em>This is a common framing mix-up — easy to fix.</em></p>`
+    body: `<p>With <strong>3 or more categories</strong> on the categorical variable + a continuous variable, you're not really computing a single correlation — you're comparing the continuous variable across groups. That's ANOVA territory.</p>
+           <p><strong>What to do:</strong> restart this tool. On Q1, pick "<em>Comparing groups</em>" instead of "<em>Looking for a relationship</em>." Then answer the follow-ups about the groups and outcome — you'll likely land on one-way ANOVA.</p>
+           <p><em>If your categorical variable is binary (2 categories) instead, go back and select "Binary" — there's a specific correlation for that case (point-biserial r).</em></p>`
   },
   linreg: {
     test: "Multiple linear regression",
@@ -408,6 +416,26 @@ const RECOMMENDATIONS = {
     body: `<p>Three or more continuous variables = multiple regression territory, not "looking for a relationship." A single correlation only relates two variables at a time.</p>
            <p><strong>What to do:</strong> restart this tool. On Q1, pick "<em>Predicting one variable from one or more others</em>." You'll likely land on multiple linear regression with a recommendation to discuss it with Dr. Hume first.</p>
            <p>If you really want pairwise correlations between several variables, that's called a <strong>correlation matrix</strong> — you compute Pearson r for each pair. It's a descriptive analysis, not an inferential test, and you should apply Bonferroni correction to the p-values (α = 0.05/k where k = number of pairs).</p>`
+  },
+  point_biserial: {
+    test: "Point-biserial correlation",
+    body: `<p><strong>Why this one:</strong> one continuous variable + one binary (2-category) variable, and you want to express the relationship as a <em>correlation</em> rather than a mean difference. Mathematically equivalent to an independent t-test, but framed differently in your reporting.</p>
+           <p><strong>When it makes more sense than a t-test:</strong> when your RQ is worded as "<em>Is X associated with Y?</em>" (correlational language) rather than "<em>Do groups differ on Y?</em>" (group-comparison language). Same analysis, different framing.</p>
+           <p><strong>What to put in IPF Field 7:</strong></p>
+           <blockquote>"Analysis: point-biserial correlation between [continuous variable] and [binary variable]. Significance threshold α = 0.05. Pre-specified."</blockquote>
+           <p><strong>Sample size guidance:</strong> at least 25–30 in the smaller of the two binary categories. Below that, the correlation is unstable.</p>
+           <p><strong>How to report:</strong> "Athlete status was significantly associated with reported stress score, r<sub>pb</sub>(98) = -0.31, p = .002 — non-athletes reported higher stress on average."</p>
+           <p><strong>Note:</strong> the result will be numerically equivalent to a t-test on the same data. Pick whichever framing fits your RQ better — don't run both.</p>`
+  },
+  spearman_matrix: {
+    test: "Spearman correlation matrix (with Bonferroni correction)",
+    cls: "warn",
+    body: `<p><strong>Why this one:</strong> three or more ordinal / non-linear variables. A single Spearman ρ only relates two variables at a time. To examine all pairwise relationships, compute a <em>matrix</em> of Spearman correlations — one ρ per pair.</p>
+           <p><strong>The Bonferroni correction is essential.</strong> If you have 4 variables, that's 6 pairs of correlations (n choose 2). Running 6 significance tests at α = .05 inflates your false-positive rate. Bonferroni-correct: α = 0.05 / 6 = 0.0083 for each test.</p>
+           <p><strong>What to put in IPF Field 7:</strong></p>
+           <blockquote>"Analysis: Spearman correlation matrix relating [variable 1, variable 2, variable 3, ...]. Bonferroni-corrected α = 0.05/k where k = number of pairwise correlations. Pre-specified."</blockquote>
+           <p><strong>How to report:</strong> "A matrix of Spearman correlations was computed across 4 variables (6 pairs). After Bonferroni correction (α = .008), two pairs reached significance: sleep duration was associated with engagement, ρ(120) = .42, p < .001; and study hours was associated with engagement, ρ(120) = .31, p = .002."</p>
+           <p><strong>If 3 variables:</strong> probably consider pairwise Spearman correlations (3 pairs, Bonferroni α = .017). If 4+: think about whether your RQ really needs all those pairs, or if you'd be better off with a focused regression. Talk to Dr. Hume.</p>`
   }
 };
 
@@ -440,13 +468,17 @@ function nextStep(currentStep, answer) {
     if (answer === 3) return 'recommendation'; // MANOVA — proceed
   }
   if (currentStep === 'q5') {
-    // After Q5, if both continuous + linear → ask about # of variables
-    if (answer === 1) return 'q9';
+    // After Q5: branch by relationship type
+    if (answer === 1) return 'q9';   // both continuous linear
+    if (answer === 2) return 'q9';   // both continuous/ordinal non-linear
+    if (answer === 3) return 'q11';  // both categorical → ask # of predictors
+    if (answer === 4) return 'q12';  // one continuous + one categorical → ask # of categories
     return 'recommendation';
   }
   if (currentStep === 'q8') return 'recommendation';
   if (currentStep === 'q9') return 'recommendation';
   if (currentStep === 'q11') return 'recommendation';
+  if (currentStep === 'q12') return 'recommendation';
   if (currentStep === 'q6') return 'recommendation';
   if (currentStep === 'q7') return 'recommendation';
   return 'recommendation';
@@ -474,13 +506,25 @@ function pickRecommendation(a) {
   // Relationships branch
   if (a.q1 === 2) {
     if (a.q5 === 1) {
-      // Both continuous + linear — check # of variables
+      // Both continuous + linear
       if (a.q9 === 2) return 'multi_var_redirect';
       return 'pearson';
     }
-    if (a.q5 === 2) return 'spearman';
-    if (a.q5 === 3) return 'chisq_rel';
-    if (a.q5 === 4) return 'redirect';
+    if (a.q5 === 2) {
+      // Both continuous/ordinal, non-linear or ranked
+      if (a.q9 === 2) return 'spearman_matrix';
+      return 'spearman';
+    }
+    if (a.q5 === 3) {
+      // Both categorical
+      if (a.q11 === 2) return 'multi_way_chisq';
+      return 'chisq_rel';
+    }
+    if (a.q5 === 4) {
+      // One continuous + one categorical
+      if (a.q12 === 1) return 'point_biserial';   // binary categorical → point-biserial r
+      if (a.q12 === 2) return 'redirect';         // 3+ categories → really an ANOVA, redirect
+    }
   }
   // Predicting branch
   if (a.q1 === 3) {
@@ -576,7 +620,8 @@ function renderRecommendation() {
     q7: "Variable type to describe",
     q8: "Number of grouping variables",
     q9: "Number of variables in relationship",
-    q11: "Number of categorical predictors"
+    q11: "Number of categorical predictors",
+    q12: "Levels of categorical variable"
   };
   const pathHtml = state.history.map(stepKey => {
     const q = QUESTIONS[stepKey];
